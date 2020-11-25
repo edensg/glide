@@ -8,6 +8,7 @@ const NAV_SELECTOR = '[data-glide-el="controls[nav]"]'
 const CONTROLS_SELECTOR = '[data-glide-el^="controls"]'
 const PREVIOUS_CONTROLS_SELECTOR = `${CONTROLS_SELECTOR} [data-glide-dir*="<"]`
 const NEXT_CONTROLS_SELECTOR = `${CONTROLS_SELECTOR} [data-glide-dir*=">"]`
+const ABSOLUTE_CONTROLS_SELECTOR = `${NAV_SELECTOR} [data-glide-dir^="="]`
 
 export default function (Glide, Components, Events) {
   /**
@@ -64,7 +65,7 @@ export default function (Glide, Components, Events) {
      */
     setActive () {
       for (let i = 0; i < this._n.length; i++) {
-        this.addClass(this._n[i].children)
+        this.addClass(this._n[i].querySelectorAll(ABSOLUTE_CONTROLS_SELECTOR))
       }
     },
 
@@ -75,7 +76,7 @@ export default function (Glide, Components, Events) {
      */
     removeActive () {
       for (let i = 0; i < this._n.length; i++) {
-        this.removeClass(this._n[i].children)
+        this.removeClass(this._n[i].querySelectorAll(ABSOLUTE_CONTROLS_SELECTOR))
       }
     },
 
@@ -94,11 +95,27 @@ export default function (Glide, Components, Events) {
       }
 
       if (item) {
-        item.classList.add(settings.classes.nav.active)
-
+        let shouldShiftFocus = false
         siblings(item).forEach(sibling => {
           sibling.classList.remove(settings.classes.nav.active)
+
+          if (sibling.checked) {
+            sibling.checked = false
+          }
+          if (document.activeElement === sibling) {
+            shouldShiftFocus = true
+          }
         })
+
+        item.classList.add(settings.classes.nav.active)
+
+        if (item.checked === false) {
+          item.checked = true
+        }
+
+        if (shouldShiftFocus) {
+          item.focus()
+        }
       }
     },
 
@@ -175,7 +192,7 @@ export default function (Glide, Components, Events) {
      */
     addBindings () {
       for (let i = 0; i < this._c.length; i++) {
-        this.bind(this._c[i].children)
+        this.bind(this._c[i].querySelectorAll('[data-glide-dir]'))
       }
     },
 
@@ -186,7 +203,7 @@ export default function (Glide, Components, Events) {
      */
     removeBindings () {
       for (let i = 0; i < this._c.length; i++) {
-        this.unbind(this._c[i].children)
+        this.unbind(this._c[i].querySelectorAll('[data-glide-dir]'))
       }
     },
 
@@ -199,6 +216,7 @@ export default function (Glide, Components, Events) {
     bind (elements) {
       for (let i = 0; i < elements.length; i++) {
         Binder.on('click', elements[i], this.click)
+        Binder.on('change', elements[i], (e) => { if (e.target.selected) this.click(e) })
         Binder.on('touchstart', elements[i], this.click, capture)
       }
     },
@@ -211,7 +229,7 @@ export default function (Glide, Components, Events) {
      */
     unbind (elements) {
       for (let i = 0; i < elements.length; i++) {
-        Binder.off(['click', 'touchstart'], elements[i])
+        Binder.off(['click', 'touchstart', 'change'], elements[i])
       }
     },
 

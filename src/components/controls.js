@@ -114,7 +114,7 @@ export default function (Glide, Components, Events) {
         }
 
         if (shouldShiftFocus) {
-          item.focus()
+          item.focus({ preventScroll: true })
         }
       }
     },

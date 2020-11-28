@@ -3397,7 +3397,7 @@ function controls (Glide, Components, Events) {
         }
 
         if (shouldShiftFocus) {
-          item.focus();
+          item.focus({ preventScroll: true });
         }
       }
     },

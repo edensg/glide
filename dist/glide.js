@@ -3403,7 +3403,7 @@
           }
 
           if (shouldShiftFocus) {
-            item.focus();
+            item.focus({ preventScroll: true });
           }
         }
       },
